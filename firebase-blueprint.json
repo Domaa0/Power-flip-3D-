@@ -1,0 +1,159 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Cloud-synced player profile, personal bests, cumulative stats, and game preferences.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase Auth UID of the player."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Player display name shown in cloud profile and stats."
+        },
+        "bestScore": {
+          "type": "integer",
+          "description": "Highest score achieved by the player."
+        },
+        "bestStreak": {
+          "type": "integer",
+          "description": "Longest consecutive landing streak achieved by the player."
+        },
+        "totalRuns": {
+          "type": "integer",
+          "description": "Total completed runs recorded in the cloud."
+        },
+        "totalPerfects": {
+          "type": "integer",
+          "description": "Cumulative perfect landings across all recorded runs."
+        },
+        "selectedSkinId": {
+          "type": "string",
+          "description": "ID of the selected FlipSkin."
+        },
+        "selectedThemeId": {
+          "type": "string",
+          "description": "ID of the selected RoomTheme."
+        },
+        "controlModeId": {
+          "type": "string",
+          "description": "ID of the selected ControlMode."
+        },
+        "soundEnabled": {
+          "type": "boolean",
+          "description": "Whether procedural arcade sound effects are enabled."
+        },
+        "hapticsEnabled": {
+          "type": "boolean",
+          "description": "Whether tactile haptics are enabled."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "bestScore",
+        "bestStreak",
+        "totalRuns",
+        "totalPerfects",
+        "selectedSkinId",
+        "selectedThemeId",
+        "controlModeId",
+        "soundEnabled",
+        "hapticsEnabled",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "FlipRun": {
+      "title": "FlipRun",
+      "description": "A single completed Power Flip 3D run log stored under the player's account.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase Auth UID of the player."
+        },
+        "score": {
+          "type": "integer",
+          "description": "Final score achieved during the run."
+        },
+        "maxStreak": {
+          "type": "integer",
+          "description": "Highest streak achieved during the run."
+        },
+        "perfectCount": {
+          "type": "integer",
+          "description": "Number of perfect landings during the run."
+        },
+        "jumpsCompleted": {
+          "type": "integer",
+          "description": "Number of platform jumps completed during the run."
+        },
+        "skinId": {
+          "type": "string",
+          "description": "FlipSkin ID used during the run."
+        },
+        "themeId": {
+          "type": "string",
+          "description": "RoomTheme ID used during the run."
+        },
+        "controlModeId": {
+          "type": "string",
+          "description": "ControlMode ID used during the run."
+        },
+        "failReason": {
+          "type": "string",
+          "description": "Optional summary of why the run ended."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the run was recorded (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the run was recorded (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "score",
+        "maxStreak",
+        "perfectCount",
+        "jumpsCompleted",
+        "skinId",
+        "themeId",
+        "controlModeId",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Player cloud profile, personal bests, and synced preferences."
+    },
+    "/users/{userId}/runs/{runId}": {
+      "schema": {
+        "$ref": "#/entities/FlipRun"
+      },
+      "description": "User-scoped history of completed Power Flip 3D runs."
+    }
+  }
+}

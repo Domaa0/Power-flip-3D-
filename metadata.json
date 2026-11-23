@@ -1,0 +1,8 @@
+{
+  "name": " Power Flip 3D",
+  "description": "A playful 3D arcade flipping game where a sculpted character acts as a moving power bar to launch flips across 3D room platforms.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

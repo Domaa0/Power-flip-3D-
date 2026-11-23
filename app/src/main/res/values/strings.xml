@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Power Flip 3D</string>
+    <string name="cd_sound_toggle">Toggle sound effects</string>
+    <string name="cd_skins_button">Customize skins and themes</string>
+    <string name="cd_help_button">How to play</string>
+    <string name="cd_close_button">Close</string>
+    <string name="cd_retry_button">Play again</string>
+    <string name="cd_cloud_profile_button">Cloud profile and run history</string>
+    <string name="auth_title">POWER FLIP 3D</string>
+    <string name="auth_subtitle">Sign in with Google to sync your high scores, unlocked skins, and flip history across devices.</string>
+    <string name="auth_sign_in_google">Sign in with Google</string>
+    <string name="auth_signing_in">Signing in…</string>
+    <string name="auth_checking_session">Checking saved Google session…</string>
+    <string name="cloud_profile_title">Cloud Profile</string>
+    <string name="cloud_sign_out">Sign Out</string>
+    <string name="cloud_recent_runs">RECENT CLOUD RUNS</string>
+    <string name="cloud_no_runs">Complete a flip run to record your first cloud score!</string>
+    <string name="cd_delete_run">Delete run</string>
+</resources>

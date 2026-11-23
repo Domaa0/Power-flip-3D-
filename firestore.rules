@@ -1,0 +1,163 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: deny all reads and writes by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.displayName is string &&
+             data.displayName.size() >= 1 &&
+             data.displayName.size() <= 80 &&
+             data.bestScore is int &&
+             data.bestScore >= 0 &&
+             data.bestScore <= 1000000 &&
+             data.bestStreak is int &&
+             data.bestStreak >= 0 &&
+             data.bestStreak <= 10000 &&
+             data.totalRuns is int &&
+             data.totalRuns >= 0 &&
+             data.totalRuns <= 1000000 &&
+             data.totalPerfects is int &&
+             data.totalPerfects >= 0 &&
+             data.totalPerfects <= 1000000 &&
+             data.selectedSkinId is string &&
+             data.selectedSkinId.size() >= 1 &&
+             data.selectedSkinId.size() <= 40 &&
+             data.selectedThemeId is string &&
+             data.selectedThemeId.size() >= 1 &&
+             data.selectedThemeId.size() <= 40 &&
+             data.controlModeId is string &&
+             data.controlModeId.size() >= 1 &&
+             data.controlModeId.size() <= 40 &&
+             data.soundEnabled is bool &&
+             data.hapticsEnabled is bool &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidFlipRun(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.score is int &&
+             data.score >= 0 &&
+             data.score <= 1000000 &&
+             data.maxStreak is int &&
+             data.maxStreak >= 0 &&
+             data.maxStreak <= 10000 &&
+             data.perfectCount is int &&
+             data.perfectCount >= 0 &&
+             data.perfectCount <= 10000 &&
+             data.jumpsCompleted is int &&
+             data.jumpsCompleted >= 0 &&
+             data.jumpsCompleted <= 10000 &&
+             data.skinId is string &&
+             data.skinId.size() >= 1 &&
+             data.skinId.size() <= 40 &&
+             data.themeId is string &&
+             data.themeId.size() >= 1 &&
+             data.themeId.size() <= 40 &&
+             data.controlModeId is string &&
+             data.controlModeId.size() >= 1 &&
+             data.controlModeId.size() <= 40 &&
+             (!('failReason' in data) || (data.failReason is string && data.failReason.size() <= 120)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'bestScore', 'bestStreak',
+                         'totalRuns', 'totalPerfects', 'selectedSkinId',
+                         'selectedThemeId', 'controlModeId', 'soundEnabled',
+                         'hapticsEnabled', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'bestScore', 'bestStreak',
+                         'totalRuns', 'totalPerfects', 'selectedSkinId',
+                         'selectedThemeId', 'controlModeId', 'soundEnabled',
+                         'hapticsEnabled', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt && (
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'bestScore', 'bestStreak', 'totalRuns', 'totalPerfects', 'updatedAt'
+                           ]) &&
+                           incoming().bestScore >= existing().bestScore &&
+                           incoming().bestStreak >= existing().bestStreak &&
+                           incoming().totalRuns >= existing().totalRuns &&
+                           incoming().totalPerfects >= existing().totalPerfects
+                         ) ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'displayName', 'selectedSkinId', 'selectedThemeId',
+                           'controlModeId', 'soundEnabled', 'hapticsEnabled', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      match /runs/{runId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(runId);
+        allow list: if isOwner(userId) && isValidId(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(userId) &&
+                         isValidId(runId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'score', 'maxStreak', 'perfectCount',
+                           'jumpsCompleted', 'skinId', 'themeId',
+                           'controlModeId', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'score', 'maxStreak', 'perfectCount',
+                           'jumpsCompleted', 'skinId', 'themeId',
+                           'controlModeId', 'failReason', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidFlipRun(incoming(), userId);
+
+        allow update: if false;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(runId);
+      }
+    }
+  }
+}
